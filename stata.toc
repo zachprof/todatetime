@@ -1,0 +1,4 @@
+v 3
+d Stata code by Zachary King
+
+p todatetime Convert strings to datetime format
