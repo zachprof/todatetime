@@ -9,10 +9,12 @@ d Additional information and illustrative examples provided at {browse "www.zach
 d 
 d Author: Zachary King
 d 
-d Version: 1.0
-d Distribution-Date: July 26, 2023
+d Version: 1.1
+d Distribution-Date: July 27, 2023
 d License: MIT
 d 
 F todatetime.ado
+F todatetime_maskfinder.ado
 F todatetime.sthlp
+F nocenturydates.dta
 F randomdates.dta
