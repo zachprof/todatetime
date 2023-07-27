@@ -1,0 +1,18 @@
+v 3
+d {bf:todatetime}: Convert strings to datetime format
+d 
+d {opt todatetime} converts one or more date variables imported as strings to Stata's {help datetime} format.
+d
+d After installation, type {bf:help todatetime}
+d
+d Additional information and illustrative examples provided at {browse "www.zach.prof":zach.prof}
+d 
+d Author: Zachary King
+d 
+d Version: 1.0
+d Distribution-Date: July 26, 2023
+d License: MIT
+d 
+F todatetime.ado
+F todatetime.sthlp
+F randomdates.dta
