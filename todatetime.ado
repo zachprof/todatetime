@@ -1,5 +1,5 @@
 *! Title:       todatetime.ado   
-*! Version:     1.0 published July 26, 2023
+*! Version:     1.1 published July 27, 2023
 *! Author:      Zachary King 
 *! Email:       zacharyjking90@gmail.com
 *! Description: Convert strings to datetime format
@@ -12,7 +12,14 @@ program def todatetime
 	
 	* Define syntax
 	
-	syntax varlist(min=1) , infmt(string) [suffix(string) UNDO]
+	syntax varlist(min=1) [, infmt(string) suffix(string) UNDO ERASESTRING]
+	
+	* Set auto_infmt = 1 if infmt not specified, = 0 otherwise
+	
+	tempname auto_infmt
+	
+	if "`infmt'" == "" local `auto_infmt' = 1
+	else local `auto_infmt' = 0
 	
 	* Set default suffix if not specified
 	
@@ -83,6 +90,11 @@ program def todatetime
 	
 	if "`undo'" != "" {
 		
+		if ``auto_infmt'' == 1 {
+			todatetime_maskfinder `varlist'`suffix'
+			local infmt = s(mask)
+		}
+		
 		tempvar undo_test
 		
 		qui: gen `undo_test' = date(`varlist'`suffix', "`infmt'")
@@ -92,7 +104,8 @@ program def todatetime
 		if _rc != 0 {
 			di as error "could not complete {bf:undo};"
 			di as error "{bf:`varlist'} and {bf:`varlist'`suffix'} represent different dates;"
-			di as error "use {bf:suffix} option to change suffix of {bf:`varlist'`suffix'} or check {bf:infmt}"
+			if ``auto_infmt'' == 1 di as error "use {bf:suffix} option to change suffix of {bf:`varlist'`suffix'} or use {bf:infmt}"
+			else di as error "use {bf:suffix} option to change suffix of {bf:`varlist'`suffix'} or check {bf:infmt}"
 			exit 198
 		}
 	
@@ -119,6 +132,11 @@ program def todatetime
 	
 	foreach v of varlist `varlist' {
 		
+		if ``auto_infmt'' == 1 {
+			todatetime_maskfinder `v'
+			local infmt = s(mask)
+		}
+		
 		local `lab': variable label `v'
 		
 		rename `v' `v'`suffix'
@@ -134,8 +152,20 @@ program def todatetime
 	}
 	
 	* Undo and display warning if new variable is missing for every observation
+	* or display warning if more missing values exist than original data
+	
+	tempvar fake_date_string
+	qui: gen `fake_date_string' = ""
+	
+	tempname n_nonmissing_string_dates n_missing
 	
 	foreach v of varlist `varlist' {
+		
+		qui: replace `fake_date_string' = subinstr(`v'`suffix'," ","",.)
+		qui: replace `fake_date_string' = subinstr(`fake_date_string',".","",.)
+
+		qui: count if `fake_date_string' != ""
+		local `n_nonmissing_string_dates' = r(N) 
 		
 		qui: count if `v' != .
 		
@@ -148,7 +178,43 @@ program def todatetime
 			rename `v'`suffix' `v'
 			label variable `v' "``lab''"
 			
-			di as error "Warning: {bf:`v'} could not be converted to datetime format; check {bf:infmt}"
+			if ``auto_infmt'' == 1 {
+				di as error "Warning: {bf:`v'} could not be converted to datetime format automatically;"
+				di as error "use {bf:infmt} to manually specify {bf:M}, {bf:D}, and {bf:[##]Y}"
+			}
+			else {
+				di as error "Warning: {bf:`v'} could not be converted to datetime format; check {bf:infmt}"
+			}
+			
+		}
+		
+		else if r(N) < ``n_nonmissing_string_dates'' {
+			
+			tempname int_length digits
+			
+			local `int_length' = length(strofreal(``n_nonmissing_string_dates'' - r(N)))
+			local `digits' = ``int_length'' + ceil(``int_length''/3) - 1
+			local `n_missing' : di %-``digits''.0fc ``n_nonmissing_string_dates'' - r(N)
+			
+			if ``auto_infmt'' == 1 {
+				di as error "Warning: {bf:`v'} contains ``n_missing'' more missing values than original data;"
+				di as error "try using {bf:infmt} to manually specify {bf:M}, {bf:D}, and {bf:[##]Y}"
+			}
+			else {
+				di as error "{bf:`v'} contains ``n_missing'' more missing values than original data; check {bf:infmt}"
+			}
+			
+		}
+		
+	}
+	
+	* Drop variable containing string if erasestring specified
+	
+	if "`erasestring'" != "" {
+		
+		foreach v of varlist `varlist' {
+			
+			qui: drop `v'`suffix'
 			
 		}
 		
