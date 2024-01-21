@@ -17,4 +17,4 @@ Author
 ------
 
 **Zachary King**  
-zacharyjking90@gmail.com  
+me@zach.prof 
