@@ -1,7 +1,7 @@
 *! Title:       todatetime_maskfinder.ado   
 *! Version:     1.0 published July 27, 2023
 *! Author:      Zachary King 
-*! Email:       zacharyjking90@gmail.com
+*! Email:       me@zach.prof
 *! Description: Attempts to identify mask (i.e., correct order for M, D, and Y);
 *!              will not work with two-digit years or otherwise ambiguous dates 
 
