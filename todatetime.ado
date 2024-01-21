@@ -1,7 +1,7 @@
 *! Title:       todatetime.ado   
 *! Version:     1.1 published July 27, 2023
 *! Author:      Zachary King 
-*! Email:       zacharyjking90@gmail.com
+*! Email:       me@zach.prof
 *! Description: Convert strings to datetime format
 
 program def todatetime
